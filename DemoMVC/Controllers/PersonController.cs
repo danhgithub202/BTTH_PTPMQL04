@@ -1,4 +1,4 @@
-using MvcMovie.Models;
+using DemoMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MvcMovie.Controllers

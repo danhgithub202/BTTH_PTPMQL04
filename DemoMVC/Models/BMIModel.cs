@@ -1,4 +1,4 @@
-namespace PhatTrienPMQL2425K2.Models
+namespace DemoMVC.Models
 {
     public class BMIModel
     {

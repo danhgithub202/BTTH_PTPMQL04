@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using PhatTrienPMQL2425K2.Models;
+using DemoMVC.Models;
 
-namespace PhatTrienPMQL2425K2.Controllers
+namespace DemoMVC.Controllers
 {
     public class BMIController : Controller
     {
