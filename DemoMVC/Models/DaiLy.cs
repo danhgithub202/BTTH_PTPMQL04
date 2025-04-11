@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;  // ✅ Bổ sung thư viện
 
-namespace MvcMovie.Models
+namespace DemoMVC.Models
 {
     public class DaiLy
     {

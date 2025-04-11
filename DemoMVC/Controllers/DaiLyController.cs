@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using MvcMovie.Data;
-using MvcMovie.Models;
+using DemoMVC.Data;
+using DemoMVC.Models;
 
 namespace MvcMovie.Controllers
 {
@@ -22,25 +21,22 @@ namespace MvcMovie.Controllers
         // GET: DaiLy
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.DaiLys.Include(d => d.HeThongPhanPhoi);
-            return View(await applicationDbContext.ToListAsync());
+            var daiLys = _context.DaiLys.Include(d => d.HeThongPhanPhoi);
+            return View(await daiLys.ToListAsync());
         }
 
         // GET: DaiLy/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
             var daiLy = await _context.DaiLys
                 .Include(d => d.HeThongPhanPhoi)
                 .FirstOrDefaultAsync(m => m.MaDaiLy == id);
+
             if (daiLy == null)
-            {
                 return NotFound();
-            }
 
             return View(daiLy);
         }
@@ -53,8 +49,6 @@ namespace MvcMovie.Controllers
         }
 
         // POST: DaiLy/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaDaiLy,TenDaiLy,DiaChi,NguoiDaiDien,DienThoai,MaHTPP")] DaiLy daiLy)
@@ -65,6 +59,7 @@ namespace MvcMovie.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["MaHTPP"] = new SelectList(_context.HeThongPhanPhois, "MaHTPP", "MaHTPP", daiLy.MaHTPP);
             return View(daiLy);
         }
@@ -72,31 +67,24 @@ namespace MvcMovie.Controllers
         // GET: DaiLy/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
             var daiLy = await _context.DaiLys.FindAsync(id);
             if (daiLy == null)
-            {
                 return NotFound();
-            }
+
             ViewData["MaHTPP"] = new SelectList(_context.HeThongPhanPhois, "MaHTPP", "MaHTPP", daiLy.MaHTPP);
             return View(daiLy);
         }
 
         // POST: DaiLy/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("MaDaiLy,TenDaiLy,DiaChi,NguoiDaiDien,DienThoai,MaHTPP")] DaiLy daiLy)
         {
             if (id != daiLy.MaDaiLy)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -108,16 +96,13 @@ namespace MvcMovie.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!DaiLyExists(daiLy.MaDaiLy))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["MaHTPP"] = new SelectList(_context.HeThongPhanPhois, "MaHTPP", "MaHTPP", daiLy.MaHTPP);
             return View(daiLy);
         }
@@ -125,18 +110,15 @@ namespace MvcMovie.Controllers
         // GET: DaiLy/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
             var daiLy = await _context.DaiLys
                 .Include(d => d.HeThongPhanPhoi)
                 .FirstOrDefaultAsync(m => m.MaDaiLy == id);
+
             if (daiLy == null)
-            {
                 return NotFound();
-            }
 
             return View(daiLy);
         }
@@ -150,9 +132,9 @@ namespace MvcMovie.Controllers
             if (daiLy != null)
             {
                 _context.DaiLys.Remove(daiLy);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

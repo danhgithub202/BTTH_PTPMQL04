@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DemoMVC.Data;
 using DemoMVC.Models;
-using System.Diagnostics;
 
 namespace DemoMVC.Controllers
 {
-    
     public class PersonController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,33 +19,49 @@ namespace DemoMVC.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Upload()
+
+        public IActionResult Upload()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file) 
+        public async Task<IActionResult> Upload(IFormFile file)
         {
-            if(file == null)
+            if (file == null)
             {
-                string fileExtension = Path.GetExtension(file.FileName);
-                if (fileExtension !=".xls"&& fileExtension != ".xlsx")
-                {
-                    ModelState.AddModelError("", "Please choose excel file to upload ");
-                }
-            else
+                ModelState.AddModelError("", "Vui lòng chọn file để upload.");
+                return View();
+            }
+
+            string fileExtension = Path.GetExtension(file.FileName).ToLower();
+            if (fileExtension != ".xls" && fileExtension != ".xlsx")
             {
-                var fileName = DateTime.Now.ToShortTimeString() + fileExtension;
-                var filePath = Path.Combine(Directory.GetCurrentDirectory() + "/Uploads/Excels", fileName);
-                var fileLocation = new FileInfo(filePath).ToString();
+                ModelState.AddModelError("", "Chỉ chấp nhận file Excel (.xls hoặc .xlsx).");
+                return View();
+            }
+
+            try
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Excels");
+                Directory.CreateDirectory(uploadsFolder); // Tạo thư mục nếu chưa có
+
+                var fileName = $"Excel_{DateTime.Now:yyyyMMdd_HHmmss}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    // save file to server
                     await file.CopyToAsync(stream);
                 }
-            }   
+
+                ViewBag.Message = "Tải file lên thành công!";
             }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Lỗi khi tải file: {ex.Message}");
+            }
+
             return View();
         }
 
@@ -55,19 +70,18 @@ namespace DemoMVC.Controllers
         {
             return View(await _context.Person.ToListAsync());
         }
+
         public async Task<IActionResult> CreateNewPerson()
         {
-            //Khoi tao 1 doi tuong kieu Person
-            var ps = new Person();
-            //gan gia tri cho cac thuoc tinh cua doi tuong tren (ps)
-            ps.Id = "PS100";
-            ps.FullName = "dfsdfsdfsdf";
-            ps.Address = "dsfsdfsdf";
-            //them doi tuong vao trong context
+            var ps = new Person
+            {
+                Id = "PS100",
+                FullName = "dfsdfsdfsdf",
+                Address = "dsfsdfsdf"
+            };
+
             _context.Add(ps);
-            //luu thay doi vao csdl
             await _context.SaveChangesAsync();
-            //dieu huong ve trang Index
             return RedirectToAction(nameof(Index));
         }
 
@@ -79,8 +93,7 @@ namespace DemoMVC.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var person = await _context.Person.FirstOrDefaultAsync(m => m.Id == id);
             if (person == null)
             {
                 return NotFound();
@@ -96,8 +109,6 @@ namespace DemoMVC.Controllers
         }
 
         // POST: Person/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FullName,Address")] Person person)
@@ -128,8 +139,6 @@ namespace DemoMVC.Controllers
         }
 
         // POST: Person/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Id,FullName,Address")] Person person)
@@ -170,8 +179,7 @@ namespace DemoMVC.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var person = await _context.Person.FirstOrDefaultAsync(m => m.Id == id);
             if (person == null)
             {
                 return NotFound();
@@ -189,9 +197,9 @@ namespace DemoMVC.Controllers
             if (person != null)
             {
                 _context.Person.Remove(person);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

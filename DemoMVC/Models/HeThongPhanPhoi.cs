@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using MvcMovie.Models;
+using DemoMVC.Models;
 public class HeThongPhanPhoi
 {
     [Key] // ✅ Thêm khóa chính
