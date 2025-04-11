@@ -1,10 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DemoMVC.Models
 {
+    [Table("Persons")]
     public class Person
     {
-        public string PersonId { get; set;}
-        public string Fullname{ get; set;}
-        public string Address{ get; set; }
+        [Key] 
+        public string Id { get; set; } 
+
+        public string? FullName { get; set; }
+        public string? Address { get; set; }
 
     }
 }
